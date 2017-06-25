@@ -109,3 +109,4 @@ class AnimationHandler {
         }
     }
 }
+customElements.define('side-menu',SideMenuComponent)
