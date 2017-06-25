@@ -5,15 +5,44 @@ class SideMenuComponent extends HTMLElement  {
         this.img = document.createElement('img')
         this.ul = document.createElement('ul')
         this.childObj = []
-        this.img.style.position = 'absolute'
-        this.img.style.left = w/20
-        this.img.style.top = w/20
         for(var i=0;i<this.children.length;i++) {
             const child = this.children[i]
-            this.childObj.push({text:child.text,href:child.href})
+            this.childObj.push({text:child.getAttribute('text'),href:child.getAttribute('href')})
         }
-        this.hamburgIcon = new HamburgIcon(this.img)
+        console.log(this.childObj)
+        this.hamburgIcon = new HamburgIcon(this.img,this.ul)
         this.animationHandler = new AnimationHandler(this)
+        const shadow = this.attachShadow({mode:'open'})
+        this.initUiPosition()
+        shadow.appendChild(this.ul)
+        shadow.appendChild(this.img)
+    }
+    initUiPosition() {
+        this.img.style.position = 'absolute'
+        const ulSize = 3*w/20
+        this.img.style.left = 0
+        this.img.style.top = 0
+        this.ul.style.width = ulSize
+
+        this.ul.style.position = 'absolute'
+        this.ul.style.left = -ulSize
+        this.ul.style.top = 0
+        this.ul.style.background = 'black'
+        this.ul.style.opacity = 0.8
+        this.ul.style.padding = '40px'
+        this.childObj.forEach((child)=>{
+            const li = document.createElement('li')
+            const a = document.createElement('a')
+            a.setAttribute('href',child.href)
+            a.innerHTML = child.text
+            a.style.color = 'white'
+            a.style.fontSize = '30px'
+            li.style.padding = '20px'
+            console.log(a)
+
+            li.appendChild(a)
+            this.ul.appendChild(li)
+        })
     }
     connectedCallback() {
         this.render()
@@ -29,7 +58,7 @@ class SideMenuComponent extends HTMLElement  {
         canvas.height = w/20
         const context = canvas.getContext('2d')
         context.save()
-        context.globalAlpha = 0.5
+        context.globalAlpha = 0.8
         context.fillStyle = 'black'
         context.fillRect(0,0,canvas.width,canvas.height)
         context.restore()
@@ -47,20 +76,21 @@ class SideMenuComponent extends HTMLElement  {
     }
 }
 class HamburgIcon {
-    constructor(img) {
-        this.ly = w/40
+    constructor(img,ul) {
+        this.ly = w/50
         this.img = img
+        this.ul = ul
         this.dir = 0
     }
     draw(context) {
         context.strokeStyle = 'white'
-        context.lineWidth = w/100
+        context.lineWidth = 3
         context.save()
         context.translate(w/40,w/40)
         for(var i=0;i<3;i++) {
             context.beginPath()
-            context.moveTo(-w/40,(i-1)*this.ly)
-            context.lineTo(w/40,(i-1)*this.ly))
+            context.moveTo(-w/50,(i-1)*this.ly)
+            context.lineTo(w/50,(i-1)*this.ly)
             context.stroke()
         }
         context.restore()
@@ -69,17 +99,20 @@ class HamburgIcon {
         this.dir = dir
     }
     update() {
-        this.img.style.left = parseFloat(this.img.style.left) + this.dir*(w/50);
-        this.ly -= this.dir*(w/200);
-        if(this.ly>w/40) {
+        this.img.style.left = parseFloat(this.img.style.left) + this.dir*(w/25)
+        this.ly -= this.dir*(w/250)
+        this.ul.style.left = parseFloat(this.ul.style.left) +this.dir*(parseFloat(this.ul.style.width)/5)
+        if(this.ly>w/50) {
             this.dir = 0
-            this.ly = w/40
-            this.img.style.left = w/20
+            this.ly = w/50
+            this.img.style.left = 0
+            this.ul.style.left = -1*parseFloat(this.ul.style.width)
         }
         if(this.ly<0) {
             this.ly = 0
-            this.img.style.left = 3*w/20
+            this.img.style.left = w/5
             this.dir = 0
+            this.ul.style.left = 0
         }
     }
     stopped() {
@@ -104,6 +137,7 @@ class AnimationHandler {
                     this.prevDir *= -1
                     this.animating = false
                     clearInterval(interval)
+                    this.component.render()
                 }
             },50)
         }
