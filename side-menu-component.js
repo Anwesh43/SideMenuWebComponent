@@ -16,6 +16,9 @@ class SideMenuComponent extends HTMLElement  {
     }
     connectedCallback() {
         this.render()
+        this.img.onmousedown = (event) => {
+
+        }
     }
     render() {
         const canvas = document.createElement('canvas')
@@ -73,5 +76,28 @@ class HamburgIcon {
     }
     stopped() {
         return this.dir == 0
+    }
+}
+class AnimationHandler {
+    constructor(component) {
+        this.prevDir = -1
+        this.animating = false
+        this.component = component
+    }
+
+    startAnimation() {
+        if(this.animating == false) {
+            this.animating = true
+            this.component.startUpdating(this.prevDir*-1)
+            const interval = setInterval(()=>{
+                this.component.render()
+                this.component.update()
+                if(this.component.stopped() == true) {
+                    this.prevDir *= -1
+                    this.animating = false
+                    clearInterval(interval)
+                }
+            },50)
+        }
     }
 }
