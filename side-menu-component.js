@@ -13,11 +13,14 @@ class SideMenuComponent extends HTMLElement  {
             this.childObj.push({text:child.text,href:child.href})
         }
         this.hamburgIcon = new HamburgIcon(this.img)
+        this.animationHandler = new AnimationHandler(this)
     }
     connectedCallback() {
         this.render()
         this.img.onmousedown = (event) => {
-
+            if(this.animationHandler) {
+                this.animationHandler.startAnimation()
+            }
         }
     }
     render() {
@@ -25,6 +28,11 @@ class SideMenuComponent extends HTMLElement  {
         canvas.width = w/20
         canvas.height = w/20
         const context = canvas.getContext('2d')
+        context.save()
+        context.globalAlpha = 0.5
+        context.fillStyle = 'black'
+        context.fillRect(0,0,canvas.width,canvas.height)
+        context.restore()
         this.hamburgIcon.draw(context)
         this.img.src = canvas.toDataURL()
     }
